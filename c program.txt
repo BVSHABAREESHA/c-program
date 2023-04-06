@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct TreeNode {
+    char* name;
+    struct TreeNode* left;
+    struct TreeNode* right;
+} TreeNode;
+
+// Function to create a new node
+TreeNode* newNode(char* name) {
+    TreeNode* node = (TreeNode*) malloc(sizeof(TreeNode));
+    node->name = name;
+    node->left = NULL;
+    node->right = NULL;
+    return node;
+}
+
+// Function to insert a node into the tree
+void insert(TreeNode** root, char* name) {
+    if (*root == NULL) {
+        *root = newNode(name);
+    } else if (strcmp(name, (*root)->name) < 0) {
+        insert(&((*root)->left), name);
+    } else {
+        insert(&((*root)->right), name);
+    }
+}
+
+// Function to delete a node from the tree
+TreeNode* delete(TreeNode* root, char* name) {
+    if (root == NULL) {
+        return root;
+    }
+    if (strcmp(name, root->name) < 0) {
+        root->left = delete(root->left, name);
+    } else if (strcmp(name, root->name) > 0) {
+        root->right = delete(root->right, name);
+    } else {
+        if (root->left == NULL) {
+            TreeNode* temp = root->right;
+            free(root);
+            return temp;
+        } else if (root->right == NULL) {
+            TreeNode* temp = root->left;
+            free(root);
+            return temp;
+        }
+        TreeNode* temp = root->right;
+        while (temp->left != NULL) {
+            temp = temp->left;
+        }
+        root->name = temp->name;
+        root->right = delete(root->right, temp->name);
+    }
+    return root;
+}
+
+// Function to search for a node in the tree
+TreeNode* search(TreeNode* root, char* name) {
+    if (root == NULL || strcmp(root->name, name) == 0) {
+        return root;
+    }
+    if (strcmp(root->name, name) < 0) {
+        return search(root->right, name);
+    } else {
+        return search(root->left, name);
+    }
+}
+
+// Function to print the directory structure
+void printTree(TreeNode* root, int depth) {
+    if (root != NULL) {
+        for (int i = 0; i < depth; i++) {
+            printf("\t");
+        }
+        printf("%s\n", root->name);
+        printTree(root->left, depth + 1);
+        printTree(root->right, depth + 1);
+    }
+}
+
+int main() {
+    TreeNode* root = NULL;
+
+    // Example usage:
+    insert(&root, "Documents");
+    insert(&root, "Pictures");
+    insert(&root, "Music");
+    insert(&(search(root, "Documents")), "Homework");
+    insert(&(search(root, "Documents")), "Projects");
+    insert(&(search(root, "Pictures")), "Vacation");
+    delete(root, "Music");
+
+    printTree(root, 0);
+
+    return 0;
+}
